@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Bar,
@@ -9,66 +8,33 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
-import { getAllInvoices } from "@/lib/api";
+import { getRevenueOverview } from "@/lib/api";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
+import { socket } from "@/lib/socket";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function RevenueChart() {
+  const queryClient = useQueryClient();
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["all-invoices"],
-    queryFn: () => getAllInvoices(),
+    queryKey: ["revenue-overview"],
+    queryFn: getRevenueOverview,
+    refetchInterval: 60_000,
   });
 
-  const chartData = useMemo(() => {
-    // 1. Check if res exists and is an array
-    const invoices = data?.res || [];
+  useEffect(() => {
+    if (!socket.connected) socket.connect();
+    const refresh = () => {
+      queryClient.invalidateQueries({ queryKey: ["revenue-overview"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-records-stats"] });
+    };
+    socket.on("payment_received", refresh);
+    return () => {
+      socket.off("payment_received", refresh);
+    };
+  }, [queryClient]);
 
-    const monthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-
-    const monthlyTotals = monthNames.reduce(
-      (acc, month) => {
-        acc[month] = 0;
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
-
-    invoices.forEach((inv) => {
-      if (inv.status === "paid") {
-        // 2. SAFETY CHECK: Get date from invoice, or fallback to user date, or current date
-        const rawDate =
-          inv.createdAt || inv.user?.createdAt || new Date().toISOString();
-        const date = new Date(rawDate);
-
-        const monthIndex = date.getMonth();
-        const monthName = monthNames[monthIndex];
-
-        // 3. Convert cents to dollars (15000 -> 150)
-        const amount = (Number(inv.totalAmount) || 0) / 100;
-
-        if (monthName) {
-          monthlyTotals[monthName] += amount;
-        }
-      }
-    });
-
-    return monthNames.map((name) => ({
-      name,
-      total: monthlyTotals[name],
-    }));
-  }, [data]);
+  const chartData = data?.chartData || [];
 
   if (isLoading)
     return (
@@ -82,8 +48,30 @@ export function RevenueChart() {
         Error loading chart
       </div>
     );
+
   return (
-    <div className="h-75 w-full mt-4">
+    <div className="space-y-3">
+      {data && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+          <div className="rounded-lg border border-slate-100 dark:border-slate-800 p-2">
+            <p className="text-[10px] uppercase text-slate-400 font-bold">Today</p>
+            <p className="text-sm font-black">${data.dailyRevenue.toFixed(2)}</p>
+          </div>
+          <div className="rounded-lg border border-slate-100 dark:border-slate-800 p-2">
+            <p className="text-[10px] uppercase text-slate-400 font-bold">This Week</p>
+            <p className="text-sm font-black">${data.weeklyRevenue.toFixed(2)}</p>
+          </div>
+          <div className="rounded-lg border border-slate-100 dark:border-slate-800 p-2">
+            <p className="text-[10px] uppercase text-slate-400 font-bold">This Month</p>
+            <p className="text-sm font-black">${data.monthlyRevenue.toFixed(2)}</p>
+          </div>
+          <div className="rounded-lg border border-slate-100 dark:border-slate-800 p-2">
+            <p className="text-[10px] uppercase text-slate-400 font-bold">All Time</p>
+            <p className="text-sm font-black text-emerald-600">${data.totalRevenue.toFixed(2)}</p>
+          </div>
+        </div>
+      )}
+    <div className="h-75 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={chartData}
@@ -125,6 +113,7 @@ export function RevenueChart() {
           />
         </BarChart>
       </ResponsiveContainer>
+    </div>
     </div>
   );
 }

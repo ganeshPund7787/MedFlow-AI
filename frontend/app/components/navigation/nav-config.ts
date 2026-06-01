@@ -11,6 +11,7 @@ import {
   LifeBuoy,
   Send,
   ReceiptCent,
+  CreditCard,
 } from "lucide-react";
 
 export interface NavItem {
@@ -114,6 +115,13 @@ export const navConfig: {
       icon: FileText,
       allowedRoles: ["admin", "doctor", "nurse", "patient"],
       items: [{ title: "Telemedicine", url: "/telemedicine" }],
+    },
+    {
+      title: "My Billing",
+      url: "/my-billing",
+      icon: CreditCard,
+      allowedRoles: ["patient"],
+      items: [{ title: "Pay Hospital Bill", url: "/my-billing" }],
     },
   ],
   navAdmin: [

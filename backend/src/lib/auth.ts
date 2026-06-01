@@ -11,7 +11,7 @@ import {
   webhooks,
 } from "@polar-sh/better-auth";
 import { Polar } from "@polar-sh/sdk";
-import invoice from "../models/invoice";
+import { handlePolarWebhookPayload } from "./polarPayments";
 
 const client = new MongoClient(process.env.MONGO_URI || "");
 const db = client.db();
@@ -61,18 +61,11 @@ export const auth = betterAuth({
         webhooks({
           secret: process.env.POLAR_WEBHOOK_SECRET!,
           onPayload: async ({ data, type }) => {
-            // console.log("Received Polar webhook:", type, data);
-            if (type === "order.paid" && data.paid) {
-              const invoiceId = data.metadata?.hospitalInvoiceId;
-              if (invoiceId) {
-                // Update your Mongo DB!
-                await invoice.findByIdAndUpdate(invoiceId, {
-                  status: "paid",
-                });
-                console.log(
-                  `✅ Invoice ${invoiceId} marked as PAID via Polar!`,
-                );
-              }
+            try {
+              await handlePolarWebhookPayload({ type, data });
+            } catch (error) {
+              console.error("[polar] Webhook handler error:", error);
+              throw error;
             }
           },
         }),

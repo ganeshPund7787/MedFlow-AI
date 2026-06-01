@@ -17,6 +17,7 @@ export default [
     route("patients", "routes/protected/Patients.tsx"),
     route("activities-log", "routes/protected/ActivitiesLog.tsx"),
     route("profile/:id", "routes/protected/Profile.tsx"),
+    route("my-billing", "routes/protected/MyBilling.tsx"),
     route("financial-history", "routes/protected/FinancialHistory.tsx"),
     route("nursing", "routes/protected/NursingStation.tsx"),
     route("pharmacy", "routes/protected/pharmacy/PharmacyDashboard.tsx"),

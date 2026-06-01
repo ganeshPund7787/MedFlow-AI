@@ -1,31 +1,18 @@
-import { useParams } from "react-router";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useParams, Link } from "react-router";
+import { useQuery } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
-import {
-  getUserById,
-  getMyActiveInvoice,
-  createCheckoutSession,
-  getBillingHistory,
-} from "@/lib/api";
+import { getUserById } from "@/lib/api";
+import PatientBillingPanel from "@/components/billing/PatientBillingPanel";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Loader2,
-  User,
-  CreditCard,
-  Receipt,
-  History,
-  CheckCircle2,
-} from "lucide-react";
-import { toast } from "sonner";
+import { User, CreditCard } from "lucide-react";
 import { STATUS_CONFIG } from "@/components/users/statusBadge";
 import Loader from "@/components/global/Loader";
 import { LogoutButton } from "@/components/auth/Logout";
@@ -42,8 +29,9 @@ const Profile = () => {
   const targetUserId = id || loggedInUser?.id;
   const isViewingOwnProfile = loggedInUser?.id === targetUserId;
   const isAdmin = loggedInUser?.role === "admin";
+  const canPay =
+    loggedInUser?.role === "patient" && isViewingOwnProfile;
 
-  // 1. Fetch Profile User
   const { data: profileUser, isLoading: profileLoading } = useQuery({
     queryKey: ["user", targetUserId],
     queryFn: () => getUserById(targetUserId!),
@@ -51,31 +39,6 @@ const Profile = () => {
   });
 
   const isPatient = profileUser?.role === "patient";
-  const isDischarged = profileUser?.status === "discharged";
-
-  // 2. Fetch Active Invoice (Only for patients - own or if admin)
-  const { data: invoice, isLoading: invoiceLoading } = useQuery({
-    queryKey: ["my-invoice", targetUserId],
-    queryFn: getMyActiveInvoice,
-    enabled: !!targetUserId && isPatient && (isViewingOwnProfile || isAdmin),
-  });
-
-  // 3. Fetch Billing History (👈 NEW)
-  const { data: billingHistory, isLoading: historyLoading } = useQuery({
-    queryKey: ["billing-history", targetUserId],
-    queryFn: () => getBillingHistory(targetUserId!),
-    enabled: !!targetUserId && isPatient && (isViewingOwnProfile || isAdmin),
-  });
-
-  const checkoutMutation = useMutation({
-    mutationFn: createCheckoutSession,
-    onSuccess: (data) => {
-      window.location.href = data.checkoutUrl;
-    },
-    onError: (error: any) => {
-      toast.error(error.message || "Failed to start checkout");
-    },
-  });
 
   if (sessionLoading || profileLoading) {
     return (
@@ -172,129 +135,22 @@ const Profile = () => {
               )}
             </CardContent>
           </Card>
-          {/* ACTIVE BILLING PORTAL (Current Bill) */}
           {isPatient && (isViewingOwnProfile || isAdmin) && (
-            <Card className="card shadow-sm overflow-hidden border-l-4 border-l-blue-500">
-              <CardHeader className="">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Receipt className="h-5 w-5 text-blue-600" />
-                    <div>
-                      <CardTitle className="text-base">
-                        Current Balance
-                      </CardTitle>
-                      <CardDescription className="text-xs">
-                        Active hospitalization charges
-                      </CardDescription>
-                    </div>
-                  </div>
-                  {invoice && (
-                    <span className="text-xl font-black">
-                      ${(invoice.totalAmount / 100).toFixed(2)}
-                    </span>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="p-6">
-                {!invoice ? (
-                  <p className="text-center text-slate-500 text-sm py-2">
-                    No active charges.
-                  </p>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      {invoice.items
-                        ?.slice(0, 2)
-                        .map((item: any, i: number) => (
-                          <div
-                            key={i}
-                            className="flex justify-between text-xs text-slate-400"
-                          >
-                            <span>{item.description}</span>
-                            <span>${(item.totalPrice / 100).toFixed(2)}</span>
-                          </div>
-                        ))}
-                      {invoice.status === "paid" ? (
-                        <Badge className="w-full justify-center py-2 bg-green-50 text-green-700 border-green-200">
-                          Payment Completed
-                        </Badge>
-                      ) : (
-                        <Button
-                          className="w-full bg-blue-600 hover:bg-blue-700"
-                          disabled={!isDischarged || checkoutMutation.isPending}
-                          onClick={() => checkoutMutation.mutate(invoice._id)}
-                        >
-                          {checkoutMutation.isPending ? (
-                            <Loader2 className="animate-spin mr-2 h-4 w-4" />
-                          ) : (
-                            <CreditCard className="mr-2 h-4 w-4" />
-                          )}
-                          {isDischarged
-                            ? "Pay and Complete Checkout"
-                            : "Awaiting Discharge"}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-          {/* BILLING HISTORY (Past Payments) 👈 NEW SECTION */}
-          {isPatient && (isViewingOwnProfile || isAdmin) && (
-            <Card className="card shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <History className="h-5 w-5 text-slate-400" />
-                  Billing History
-                </CardTitle>
-                <CardDescription>
-                  Records of your previous settled invoices.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {historyLoading ? (
-                  <div className="flex justify-center py-4">
-                    <Loader2 className="animate-spin h-5 w-5 text-slate-300" />
-                  </div>
-                ) : !billingHistory || billingHistory.length === 0 ? (
-                  <p className="text-center text-slate-400 text-sm py-4 italic border border-dashed rounded-lg">
-                    No previous payments found.
-                  </p>
-                ) : (
-                  <div className="space-y-4">
-                    {billingHistory.map((pastInv: any) => (
-                      <div
-                        key={pastInv._id}
-                        className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-900/30"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full text-green-600">
-                            <CheckCircle2 size={16} />
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold">
-                              ${(pastInv.totalAmount / 100).toFixed(2)}
-                            </p>
-                            <p className="text-[10px] text-slate-500 uppercase tracking-wide">
-                              Paid on{" "}
-                              {new Date(pastInv.updatedAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-xs h-7 px-2"
-                        >
-                          Details
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <div className="space-y-4">
+              {canPay && (
+                <Button asChild variant="outline" className="w-full gap-2">
+                  <Link to="/my-billing">
+                    <CreditCard className="h-4 w-4" />
+                    Open full billing & payment page
+                  </Link>
+                </Button>
+              )}
+              <PatientBillingPanel
+                patientId={targetUserId!}
+                canPay={canPay}
+                patientStatus={profileUser.status}
+              />
+            </div>
           )}
         </div>
       </div>

@@ -2,7 +2,8 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IInvoice extends Document {
   patientId: string;
-  polarCheckoutId?: string; // Links to Polar transaction
+  polarCheckoutId?: string;
+  polarOrderId?: string;
   status: "draft" | "pending_payment" | "paid";
   items: Array<{
     description: string; // e.g., "Chest X-Ray"
@@ -18,6 +19,7 @@ const InvoiceSchema = new Schema(
   {
     patientId: { type: String, required: true },
     polarCheckoutId: { type: String },
+    polarOrderId: { type: String },
     status: {
       type: String,
       enum: ["draft", "pending_payment", "paid"],

@@ -170,9 +170,14 @@ export const getUserById = async (userId: string) => {
   return fetchWithTimeout(`${API_URL}/users/profile/${userId}`);
 };
 
-export const getMyActiveInvoice = async () => {
+export const getMyActiveInvoice = async (patientId?: string) => {
   try {
-    return await fetchWithTimeout(`${API_URL}/invoices/my-active-invoice`);
+    const query = patientId
+      ? `?patientId=${encodeURIComponent(patientId)}`
+      : "";
+    return await fetchWithTimeout(
+      `${API_URL}/invoices/my-active-invoice${query}`,
+    );
   } catch (error: any) {
     if (error.message.includes("404")) return null;
     throw error;
@@ -312,6 +317,27 @@ export const dispensePrescription = async (prescriptionId: string) => {
 
 export const getFinancialStats = async (): Promise<any> => {
   return fetchWithTimeout(`${API_URL}/invoices/stats`);
+};
+
+export const getRevenueOverview = async (): Promise<{
+  dailyRevenue: number;
+  weeklyRevenue: number;
+  monthlyRevenue: number;
+  totalRevenue: number;
+  chartData: { name: string; total: number }[];
+}> => {
+  return fetchWithTimeout(`${API_URL}/payments/revenue-overview`);
+};
+
+export const getMyPaymentHistory = async (params?: {
+  page?: number;
+  limit?: number;
+}) => {
+  const query = new URLSearchParams({
+    page: (params?.page || 1).toString(),
+    limit: (params?.limit || 10).toString(),
+  }).toString();
+  return fetchWithTimeout(`${API_URL}/payments/my-history?${query}`);
 };
 
 export const getSettings = async (): Promise<any> => {

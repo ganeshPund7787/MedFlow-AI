@@ -172,12 +172,19 @@ export const admitPatient = async (req: Request, res: Response) => {
 // polar portal
 export const getPolarPortalLink = async (req: Request, res: Response) => {
   try {
+    const currentUser = (req as any).user;
+    if (currentUser.role !== "admin") {
+      return res.status(403).json({
+        message: "Only administrators can open Polar customer portals",
+      });
+    }
+
     const { userId } = req.params;
     if (!userId) {
       return res.status(400).json({ message: "User ID is required" });
     }
     const result = await polarClient.customerSessions.create({
-      externalCustomerId: userId as string, // The internal Polar Customer ID
+      externalCustomerId: userId as string,
     });
     res.json({ polarPortalUrl: result.customerPortalUrl });
   } catch (error) {

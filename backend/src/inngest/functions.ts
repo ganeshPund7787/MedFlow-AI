@@ -7,7 +7,14 @@ import labResults from "../models/labResults";
 import invoice from "../models/invoice";
 import { completeXrayLabResult } from "../lib/xrayAnalysis";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY!);
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+
+function getGenAI() {
+  if (!process.env.GEMINI_KEY) {
+    throw new NonRetriableError("GEMINI_KEY is not configured on the server.");
+  }
+  return new GoogleGenerativeAI(process.env.GEMINI_KEY);
+}
 
 export const admitPatient = inngest.createFunction(
   { id: "admit-patient", triggers: [{ event: "patient/admitted" }] },
@@ -47,8 +54,8 @@ export const admitPatient = inngest.createFunction(
     // step2: ask gemini ai to assign staff based on their roles/specialization
     const aiAssignment = await step.run("ai-triage", async () => {
       // model
-      const model = genAI.getGenerativeModel({
-        model: "gemini-3-flash-preview",
+      const model = getGenAI().getGenerativeModel({
+        model: GEMINI_MODEL,
         generationConfig: { responseMimeType: "application/json" },
       });
       //  patient data

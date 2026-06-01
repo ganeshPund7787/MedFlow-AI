@@ -103,10 +103,27 @@ export interface ActivityLog {
   createdAt: Date;
 }
 
+export interface PaymentRecord {
+  _id: string;
+  patientId: string;
+  invoiceId?: string;
+  polarPaymentId?: string;
+  polarOrderId?: string;
+  polarCheckoutId?: string;
+  amount: number;
+  currency: string;
+  status: "pending" | "succeeded" | "failed" | "refunded";
+  invoiceReference?: string;
+  paidAt?: string;
+  createdAt: string;
+  user?: User;
+}
+
 export interface invoice {
   _id: string;
   user: User;
-  polarCheckoutId?: string; // Links to Polar transaction
+  polarCheckoutId?: string;
+  polarOrderId?: string;
   status: "draft" | "pending_payment" | "paid";
   items: Array<{
     description: string; // e.g., "Chest X-Ray"

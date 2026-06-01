@@ -25,6 +25,14 @@ export function getProtectedRouteConfig(path: string): NavItem | null {
   const fromNav = getRouteConfig(path, getAllNavItems());
   if (fromNav) return fromNav;
 
+  if (path === "/my-billing") {
+    return {
+      title: "My Billing",
+      url: path,
+      allowedRoles: ["patient"],
+    };
+  }
+
   // Settings index and nested admin pages (not duplicated in navMain)
   if (path === "/settings" || path.startsWith("/settings/")) {
     if (SETTINGS_STAFF_PATHS.has(path)) {

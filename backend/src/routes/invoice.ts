@@ -23,12 +23,22 @@ invoiceRouter.get(
 invoiceRouter.get(
   "/my-active-invoice",
   requireAuth,
-  checkRole(["patient"]),
+  checkRole(["patient", "admin"]),
   getMyActiveInvoice,
 );
 
-invoiceRouter.get("/history/:id", requireAuth, getBillingHistory);
-invoiceRouter.post("/:id/checkout", requireAuth, createCheckoutSession);
+invoiceRouter.get(
+  "/history/:patientId",
+  requireAuth,
+  checkRole(["admin", "patient"]),
+  getBillingHistory,
+);
+invoiceRouter.post(
+  "/:id/checkout",
+  requireAuth,
+  checkRole(["patient"]),
+  createCheckoutSession,
+);
 
 // Support both GET and POST at root / to accommodate api.ts post request with full backwards compatibility
 invoiceRouter.get("/", requireAuth, checkRole(["admin"]), allBilling);

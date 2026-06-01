@@ -36,7 +36,12 @@ userRouter.post(
   admitPatient,
 );
 
-userRouter.get("/polar-portal/:userId", requireAuth, getPolarPortalLink);
+userRouter.get(
+  "/polar-portal/:userId",
+  requireAuth,
+  checkRole(["admin"]),
+  getPolarPortalLink,
+);
 
 // if :id route is first, it will catch all routes including /update/:id, so we need to put it after the /update/:id route
 export default userRouter;

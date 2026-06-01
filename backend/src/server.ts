@@ -25,6 +25,7 @@ import {
 import notificationRouter from "./routes/notification";
 import labResultsRouter from "./routes/labResults";
 import invoiceRouter from "./routes/invoice";
+import paymentsRouter from "./routes/payments";
 import nursingRouter from "./routes/nursing";
 import pharmacyRouter from "./routes/pharmacy";
 import appointmentRouter from "./routes/appointment";
@@ -116,6 +117,7 @@ app.use("/api/activity-logs", activityLogRouter);
 app.use("/api/notifications", notificationRouter);
 app.use("/api/lab-results", labResultsRouter);
 app.use("/api/invoices", invoiceRouter);
+app.use("/api/payments", paymentsRouter);
 app.use("/api/nursing", nursingRouter);
 app.use("/api/pharmacy", pharmacyRouter);
 app.use("/api/appointments", appointmentRouter);

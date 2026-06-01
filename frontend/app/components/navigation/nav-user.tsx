@@ -26,7 +26,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Link } from "react-router";
 import { useLogout } from "@/hooks/useLogout";
+import { authClient } from "@/lib/auth-client";
 
 export function NavUser({
   user,
@@ -38,8 +40,9 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const { data: session } = authClient.useSession();
+  const isPatient = session?.user?.role === "patient";
 
-  // logout
   const { logout, isPending } = useLogout();
 
   return (
@@ -93,9 +96,11 @@ export function NavUser({
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
+              <DropdownMenuItem asChild>
+                <Link to={isPatient ? "/my-billing" : "/records"}>
+                  <CreditCard />
+                  {isPatient ? "Pay my bill" : "Billing"}
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Bell />

@@ -6,7 +6,7 @@ export function getPostLoginPath(
   userId?: string,
 ): string {
   if (role === "patient" && userId) {
-    return `/profile/${userId}`;
+    return "/my-billing";
   }
   return "/dashboard";
 }

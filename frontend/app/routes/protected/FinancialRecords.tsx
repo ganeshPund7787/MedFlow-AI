@@ -82,6 +82,13 @@ const FinancialRecords = () => {
               <h4 className="text-xl font-bold text-amber-400">${pendingVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h4>
               <p className="text-[10px] text-slate-500">{stats?.pendingCount || 0} await checkouts</p>
             </div>
+            <div className="space-y-1">
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Polar Transactions</span>
+              <h4 className="text-xl font-bold text-slate-300">{stats?.totalPayments || 0}</h4>
+              <p className="text-[10px] text-slate-500">
+                {stats?.successfulPayments || 0} ok • {stats?.failedPayments || 0} failed
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>

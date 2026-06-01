@@ -12,6 +12,18 @@ const genAI = process.env.GEMINI_KEY
 const GEMINI_MODEL =
   process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
+/** Avoid exposing raw Google API errors (e.g. leaked key) in patient-facing text. */
+export function toUserFacingGeminiError(error: unknown): string {
+  const msg = error instanceof Error ? error.message : String(error);
+  if (/leaked|403|invalid.*api.*key|permission denied/i.test(msg)) {
+    return "Gemini API key is invalid or revoked. Set a new GEMINI_KEY in backend/.env (see .env.example) and restart the server.";
+  }
+  if (/not configured|GEMINI_KEY/i.test(msg)) {
+    return "Gemini is not configured on this server (GEMINI_KEY missing).";
+  }
+  return "AI analysis is temporarily unavailable. Please try again later.";
+}
+
 export async function analyzeXrayWithGemini(
   imageUrl: string,
   bodyPart: string,
@@ -77,9 +89,7 @@ export async function completeXrayLabResult(
   try {
     aiAnalysis = await analyzeXrayWithGemini(imageUrl, bodyPart || "region");
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unknown analysis error";
-    aiAnalysis = `AI analysis could not be completed. ${message}`;
+    aiAnalysis = `AI analysis could not be completed. ${toUserFacingGeminiError(error)}`;
     console.error("[xray] Gemini analysis failed:", error);
   }
 

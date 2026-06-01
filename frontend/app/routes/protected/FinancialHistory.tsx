@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getAllInvoices, polarPortalLink } from "@/lib/api";
+import { getAllInvoices, getFinancialStats, polarPortalLink } from "@/lib/api";
 import {
   Table,
   TableBody,
@@ -44,6 +44,11 @@ const FinancialHistory = () => {
     queryKey: ["all-invoices", page],
     queryFn: () => getAllInvoices({ page, limit: 10 }),
     placeholderData: (previousData) => previousData,
+  });
+
+  const { data: stats } = useQuery({
+    queryKey: ["financial-records-stats"],
+    queryFn: getFinancialStats,
   });
 
   const getPolarPortalLink = useMutation({
@@ -129,15 +134,12 @@ const FinancialHistory = () => {
               </Badge>
             </div>
             <div className="mt-4">
-              <p className="text-blue-100 text-sm font-medium">Total Billed</p>
+              <p className="text-blue-100 text-sm font-medium">Polar Revenue</p>
               <h3 className="text-2xl font-black mt-1">
                 $
-                {(
-                  invoices.reduce(
-                    (sum: number, inv: any) => sum + (inv.totalAmount || 0),
-                    0,
-                  ) / 100
-                ).toLocaleString()}
+                {((stats?.totalRevenue || 0) / 100).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
               </h3>
             </div>
           </CardContent>
@@ -151,11 +153,10 @@ const FinancialHistory = () => {
             </div>
             <div className="mt-4">
               <p className="text-slate-500 text-sm font-medium">
-                Successfully Paid
+                Successful Payments
               </p>
               <h3 className="text-2xl font-black mt-1 text-slate-900 dark:text-white">
-                {invoices.filter((i: any) => i.status === "paid").length}{" "}
-                Invoices
+                {stats?.successfulPayments ?? 0} Transactions
               </h3>
             </div>
           </CardContent>
@@ -168,15 +169,9 @@ const FinancialHistory = () => {
               </div>
             </div>
             <div className="mt-4">
-              <p className="text-slate-500 text-sm font-medium">
-                Awaiting Payment
-              </p>
+              <p className="text-slate-500 text-sm font-medium">Failed Payments</p>
               <h3 className="text-2xl font-black mt-1 text-slate-900 dark:text-white">
-                {
-                  invoices.filter((i: any) => i.status === "pending_payment")
-                    .length
-                }{" "}
-                Invoices
+                {stats?.failedPayments ?? 0} Transactions
               </h3>
             </div>
           </CardContent>
