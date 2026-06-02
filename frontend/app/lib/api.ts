@@ -190,6 +190,14 @@ export const createCheckoutSession = async (invoiceId: string) => {
   });
 };
 
+export const confirmPolarCheckout = async (checkoutId: string) => {
+  return fetchWithTimeout(`${API_URL}/invoices/confirm-checkout`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ checkoutId }),
+  });
+};
+
 export const getBillingHistory = async (userId: string) => {
   return fetchWithTimeout(`${API_URL}/invoices/history/${userId}`);
 };

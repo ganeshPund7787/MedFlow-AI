@@ -3,8 +3,17 @@ import invoice from "../models/invoice";
 import Payment from "../models/payment";
 import { fromNodeHeaders } from "better-auth/node";
 import mongoose from "mongoose";
-import { auth, polarClient } from "../lib/auth";
+import { auth } from "../lib/auth";
+import { polarClient } from "../lib/polarClient";
 import { resolvePatientBillingId } from "../lib/invoiceAccess";
+import {
+  syncCheckoutFromPolar,
+  reconcilePendingPolarCheckouts,
+} from "../lib/polarPayments";
+import {
+  getCollectedRevenueCents,
+  countSuccessfulTransactions,
+} from "../lib/revenueStats";
 
 export const getMyActiveInvoice = async (req: Request, res: Response) => {
   try {
@@ -181,6 +190,8 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
 // 5. Get Financial Stats summary
 export const getFinancialStats = async (req: Request, res: Response) => {
   try {
+    await reconcilePendingPolarCheckouts(15);
+
     const invoices = await invoice.find().lean();
 
     let totalRevenue = 0;
@@ -204,21 +215,16 @@ export const getFinancialStats = async (req: Request, res: Response) => {
       }
     });
 
-    const [succeededPayments, failedPayments, totalPayments] =
+    const [collectedRevenue, successfulPayments, failedPayments, totalPayments] =
       await Promise.all([
-        Payment.countDocuments({ status: "succeeded" }),
+        getCollectedRevenueCents(),
+        countSuccessfulTransactions(),
         Payment.countDocuments({ status: "failed" }),
         Payment.countDocuments(),
       ]);
 
-    const paymentRevenueAgg = await Payment.aggregate([
-      { $match: { status: "succeeded" } },
-      { $group: { _id: null, total: { $sum: "$amount" } } },
-    ]);
-    const polarTotalRevenue = paymentRevenueAgg[0]?.total || 0;
-
     res.status(200).json({
-      totalRevenue: polarTotalRevenue || totalRevenue,
+      totalRevenue: collectedRevenue || totalRevenue,
       totalPending,
       totalDraft,
       paidCount,
@@ -227,11 +233,42 @@ export const getFinancialStats = async (req: Request, res: Response) => {
       totalBilled: totalRevenue + totalPending + totalDraft,
       totalInvoiceCount: invoices.length,
       totalPayments,
-      successfulPayments: succeededPayments,
+      successfulPayments,
       failedPayments,
     });
   } catch (error: any) {
     console.error("Error computing financial stats:", error);
     res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+/** Patient return URL — sync Polar checkout when webhooks are not delivered (e.g. local dev). */
+export const confirmPolarCheckout = async (req: Request, res: Response) => {
+  try {
+    const sessionUser = (req as any).user;
+    if (sessionUser.role !== "patient") {
+      return res.status(403).json({ message: "Only patients can confirm checkout" });
+    }
+
+    const { checkoutId } = req.body as { checkoutId?: string };
+    if (!checkoutId) {
+      return res.status(400).json({ message: "checkoutId is required" });
+    }
+
+    const result = await syncCheckoutFromPolar(checkoutId);
+    if (!result) {
+      return res.status(400).json({
+        message: "Checkout is not completed yet or could not be synced",
+      });
+    }
+
+    res.status(200).json({
+      message: "Payment synced successfully",
+      invoiceId: result.hospitalInvoiceId,
+      amount: result.amount,
+    });
+  } catch (error) {
+    console.error("confirmPolarCheckout:", error);
+    res.status(500).json({ message: "Failed to confirm checkout with Polar" });
   }
 };

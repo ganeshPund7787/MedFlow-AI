@@ -1,6 +1,13 @@
 import type { Request, Response } from "express";
 import Payment from "../models/payment";
+import invoice from "../models/invoice";
 import mongoose from "mongoose";
+import {
+  getCollectedRevenueCents,
+  sumPaymentRevenueCents,
+  sumPaidInvoiceRevenueCents,
+} from "../lib/revenueStats";
+import { reconcilePendingPolarCheckouts } from "../lib/polarPayments";
 
 function startOfDay(d: Date) {
   const x = new Date(d);
@@ -20,47 +27,76 @@ function startOfMonth(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), 1);
 }
 
-function sumSucceededSince(since: Date) {
-  return Payment.aggregate([
+async function revenueSinceFromInvoices(since: Date) {
+  const agg = await invoice.aggregate([
     {
       $match: {
-        status: "succeeded",
-        paidAt: { $gte: since },
+        status: "paid",
+        updatedAt: { $gte: since },
       },
     },
-    { $group: { _id: null, total: { $sum: "$amount" } } },
+    { $group: { _id: null, total: { $sum: "$totalAmount" } } },
   ]);
+  return agg[0]?.total || 0;
 }
 
-/** Admin dashboard + revenue chart analytics from Polar payment records. */
+/** Admin dashboard + revenue chart — uses payments and paid invoices. */
 export const getRevenueOverview = async (_req: Request, res: Response) => {
   try {
+    await reconcilePendingPolarCheckouts(15);
+
     const now = new Date();
     const dayStart = startOfDay(now);
     const weekStart = startOfWeek(now);
     const monthStart = startOfMonth(now);
+    const yearStart = new Date(now.getFullYear(), 0, 1);
 
-    const [daily, weekly, monthly, totalAgg, monthlyChart] = await Promise.all([
-      sumSucceededSince(dayStart),
-      sumSucceededSince(weekStart),
-      sumSucceededSince(monthStart),
-      Payment.aggregate([
-        { $match: { status: "succeeded" } },
-        { $group: { _id: null, total: { $sum: "$amount" } } },
-      ]),
+    const [
+      dailyPay,
+      weeklyPay,
+      monthlyPay,
+      totalPay,
+      dailyInv,
+      weeklyInv,
+      monthlyInv,
+      totalInv,
+      monthlyChartPay,
+      monthlyChartInv,
+    ] = await Promise.all([
+      sumPaymentRevenueCents({ paidAt: { $gte: dayStart } }),
+      sumPaymentRevenueCents({ paidAt: { $gte: weekStart } }),
+      sumPaymentRevenueCents({ paidAt: { $gte: monthStart } }),
+      sumPaymentRevenueCents(),
+      revenueSinceFromInvoices(dayStart),
+      revenueSinceFromInvoices(weekStart),
+      revenueSinceFromInvoices(monthStart),
+      sumPaidInvoiceRevenueCents(),
       Payment.aggregate([
         {
           $match: {
             status: "succeeded",
-            paidAt: {
-              $gte: new Date(now.getFullYear(), 0, 1),
-            },
+            paidAt: { $gte: yearStart },
           },
         },
         {
           $group: {
             _id: { $month: "$paidAt" },
             total: { $sum: "$amount" },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]),
+      invoice.aggregate([
+        {
+          $match: {
+            status: "paid",
+            updatedAt: { $gte: yearStart },
+          },
+        },
+        {
+          $group: {
+            _id: { $month: "$updatedAt" },
+            total: { $sum: "$totalAmount" },
           },
         },
         { $sort: { _id: 1 } },
@@ -83,18 +119,18 @@ export const getRevenueOverview = async (_req: Request, res: Response) => {
     ];
 
     const chartByMonth = monthNames.map((name, index) => {
-      const row = monthlyChart.find((r) => r._id === index + 1);
-      return {
-        name,
-        total: row ? row.total / 100 : 0,
-      };
+      const month = index + 1;
+      const payRow = monthlyChartPay.find((r) => r._id === month);
+      const invRow = monthlyChartInv.find((r) => r._id === month);
+      const cents = Math.max(payRow?.total || 0, invRow?.total || 0);
+      return { name, total: cents / 100 };
     });
 
     res.status(200).json({
-      dailyRevenue: (daily[0]?.total || 0) / 100,
-      weeklyRevenue: (weekly[0]?.total || 0) / 100,
-      monthlyRevenue: (monthly[0]?.total || 0) / 100,
-      totalRevenue: (totalAgg[0]?.total || 0) / 100,
+      dailyRevenue: Math.max(dailyPay, dailyInv) / 100,
+      weeklyRevenue: Math.max(weeklyPay, weeklyInv) / 100,
+      monthlyRevenue: Math.max(monthlyPay, monthlyInv) / 100,
+      totalRevenue: Math.max(totalPay, totalInv) / 100,
       chartData: chartByMonth,
     });
   } catch (error) {

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { requireAuth } from "../middleware/auth";
 import {
   createCheckoutSession,
+  confirmPolarCheckout,
   getMyActiveInvoice,
   getBillingHistory,
   allBilling,
@@ -38,6 +39,12 @@ invoiceRouter.post(
   requireAuth,
   checkRole(["patient"]),
   createCheckoutSession,
+);
+invoiceRouter.post(
+  "/confirm-checkout",
+  requireAuth,
+  checkRole(["patient"]),
+  confirmPolarCheckout,
 );
 
 // Support both GET and POST at root / to accommodate api.ts post request with full backwards compatibility

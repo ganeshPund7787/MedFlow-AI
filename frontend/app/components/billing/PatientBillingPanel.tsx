@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getMyActiveInvoice,
   createCheckoutSession,
+  confirmPolarCheckout,
   getBillingHistory,
   getMyPaymentHistory,
 } from "@/lib/api";
@@ -84,11 +85,27 @@ export default function PatientBillingPanel({
 
   useEffect(() => {
     const checkoutStatus = searchParams.get("checkout");
-    if (checkoutStatus === "success") {
-      toast.success("Payment received. Your bill status will update shortly.");
+    const checkoutId = searchParams.get("checkout_id");
+
+    const syncAfterReturn = async () => {
+      if (checkoutId) {
+        try {
+          await confirmPolarCheckout(checkoutId);
+        } catch {
+          /* webhook may have already synced */
+        }
+      }
       queryClient.invalidateQueries({ queryKey: ["my-invoice", patientId] });
       queryClient.invalidateQueries({ queryKey: ["billing-history", patientId] });
       queryClient.invalidateQueries({ queryKey: ["my-payments", patientId] });
+      queryClient.invalidateQueries({ queryKey: ["financial-records-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["revenue-overview"] });
+    };
+
+    if (checkoutStatus === "success") {
+      void syncAfterReturn().then(() => {
+        toast.success("Payment received. Your bill has been updated.");
+      });
       searchParams.delete("checkout");
       searchParams.delete("checkout_id");
       setSearchParams(searchParams, { replace: true });

@@ -68,7 +68,7 @@ export const navConfig: {
       title: "Nursing Station",
       url: "/nursing",
       icon: ClipboardPlus,
-      allowedRoles: ["admin", "doctor"],
+      allowedRoles: ["admin", "doctor", "nurse"],
       items: [
         { title: "Overview", url: "/nursing" },
         { title: "Nurses Directory", url: "/nurses" },

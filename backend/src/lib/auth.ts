@@ -10,19 +10,13 @@ import {
   usage,
   webhooks,
 } from "@polar-sh/better-auth";
-import { Polar } from "@polar-sh/sdk";
 import { handlePolarWebhookPayload } from "./polarPayments";
+import { polarClient } from "./polarClient";
+
+export { polarClient };
 
 const client = new MongoClient(process.env.MONGO_URI || "");
 const db = client.db();
-
-export const polarClient = new Polar({
-  accessToken: process.env.POLAR_ACCESS_TOKEN,
-  // Use 'sandbox' if you're using the Polar Sandbox environment
-  // Remember that access tokens, products, etc. are completely separated between environments.
-  // Access tokens obtained in Production are for instance not usable in the Sandbox environment.
-  server: "sandbox",
-});
 
 export const auth = betterAuth({
   database: mongodbAdapter(db),
@@ -138,50 +132,50 @@ export const auth = betterAuth({
 });
 
 // more advanced example with role-based access control using the admin plugin
-// admin({
-//       defaultRole: "patient",
-//       // Define the authorized roles for the admin plugin
-//       // This allows you to use authClient.admin.setRole() etc.
-//       adminRole: ["admin", "superadmin"],
+admin({
+      defaultRole: "patient",
+      // Define the authorized roles for the admin plugin
+      // This allows you to use authClient.admin.setRole() etc.
+      adminRole: ["admin", "superadmin"],
 
-//       // Fine-grained permissions (Statements)
-//       // This is helpful if you use auth.api.checkPermission() in your backend
-//       roles: {
-//         admin: {
-//           statements: [{ resource: "all", action: "all" }]
-//         },
-//         doctor: {
-//           statements: [
-//             { resource: "patient", action: "read" },
-//             { resource: "patient", action: "update" },
-//             { resource: "lab_results", action: "all" },
-//             { resource: "prescriptions", action: "all" }
-//           ]
-//         },
-//         nurse: {
-//           statements: [
-//             { resource: "patient", action: "read" },
-//             { resource: "vitals", action: "create" },
-//             { resource: "lab_results", action: "read" }
-//           ]
-//         },
-//         pharmacist: {
-//           statements: [
-//             { resource: "prescriptions", action: "read" },
-//             { resource: "billing", action: "all" }
-//           ]
-//         },
-//         lab_tech: {
-//           statements: [
-//             { resource: "lab_results", action: "create" },
-//             { resource: "lab_results", action: "update" }
-//           ]
-//         },
-//         patient: {
-//           statements: [
-//             { resource: "my_profile", action: "read" },
-//             { resource: "my_billing", action: "read" }
-//           ]
-//         }
-//       }
-//     })
+      // Fine-grained permissions (Statements)
+      // This is helpful if you use auth.api.checkPermission() in your backend
+      roles: {
+        admin: {
+          statements: [{ resource: "all", action: "all" }]
+        },
+        doctor: {
+          statements: [
+            { resource: "patient", action: "read" },
+            { resource: "patient", action: "update" },
+            { resource: "lab_results", action: "all" },
+            { resource: "prescriptions", action: "all" }
+          ]
+        },
+        nurse: {
+          statements: [
+            { resource: "patient", action: "read" },
+            { resource: "vitals", action: "create" },
+            { resource: "lab_results", action: "read" }
+          ]
+        },
+        pharmacist: {
+          statements: [
+            { resource: "prescriptions", action: "read" },
+            { resource: "billing", action: "all" }
+          ]
+        },
+        lab_tech: {
+          statements: [
+            { resource: "lab_results", action: "create" },
+            { resource: "lab_results", action: "update" }
+          ]
+        },
+        patient: {
+          statements: [
+            { resource: "my_profile", action: "read" },
+            { resource: "my_billing", action: "read" }
+          ]
+        }
+      }
+    })
