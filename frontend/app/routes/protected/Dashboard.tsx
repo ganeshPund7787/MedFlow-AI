@@ -11,6 +11,8 @@ import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import ActiveAssignmentsBoard from "@/components/dashboard/ActiveAssignmentsBoard";
 import { authClient } from "@/lib/auth-client";
 import { getPostLoginPath } from "@/lib/auth-redirect";
+import { Link } from "react-router";
+import { Button } from "@/components/ui/button";
 
 export function meta() {
   return [{ title: "Dashboard" }];
@@ -81,6 +83,11 @@ export default function HMSDashboard() {
             <section className="card p-6 rounded-xl shadow-sm">
               <h3 className="text-lg font-bold mb-6">Revenue Overview</h3>
               <RevenueChart />
+              <div className="mt-4 flex justify-end">
+                <Button asChild variant="outline">
+                  <Link to="/ai-insights">Open AI Insights</Link>
+                </Button>
+              </div>
             </section>
           )}
         </div>

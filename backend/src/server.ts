@@ -30,6 +30,7 @@ import nursingRouter from "./routes/nursing";
 import pharmacyRouter from "./routes/pharmacy";
 import appointmentRouter from "./routes/appointment";
 import settingsRouter from "./routes/settings";
+import aiRouter from "./routes/ai";
 import { getIO, initSocket } from "./lib/socket";
 import { uploadRouter } from "./lib/uploadthing";
 import { createRouteHandler } from "uploadthing/express";
@@ -91,7 +92,7 @@ if (process.env.NODE_ENV === "development") {
 
 // Basic route for testing
 app.get("/", (req: Request, res: Response) => {
-  res.send("Hello from the backend! Anti-Gravity Architecture Active 🚀");
+  res.send("Hello from the backend! Architecture Active 🚀");
 });
 
 app.use("/api/auth", (req, res, next) => {
@@ -122,6 +123,7 @@ app.use("/api/nursing", nursingRouter);
 app.use("/api/pharmacy", pharmacyRouter);
 app.use("/api/appointments", appointmentRouter);
 app.use("/api/settings", settingsRouter);
+app.use("/api/ai", aiRouter);
 
 // inngest API route
 app.use(
@@ -138,6 +140,7 @@ app.use("/api/uploadthing/delete", uploadthingRouter);
 // --- Anti-Gravity Resilience Middleware ---
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
+
 
 // Start the server
 connectDB()

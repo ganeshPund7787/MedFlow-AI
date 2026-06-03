@@ -12,6 +12,8 @@ import {
   Send,
   ReceiptCent,
   CreditCard,
+  BrainCircuit,
+  LineChart,
 } from "lucide-react";
 
 export interface NavItem {
@@ -117,6 +119,13 @@ export const navConfig: {
       items: [{ title: "Telemedicine", url: "/telemedicine" }],
     },
     {
+      title: "AI Clinical Assistant",
+      url: "/clinical-assistant",
+      icon: BrainCircuit,
+      allowedRoles: ["admin", "doctor", "nurse"],
+      items: [{ title: "Patient Insights", url: "/clinical-assistant" }],
+    },
+    {
       title: "My Billing",
       url: "/my-billing",
       icon: CreditCard,
@@ -134,7 +143,15 @@ export const navConfig: {
         { title: "General", url: "/settings/general" },
         { title: "Roles & Permissions", url: "/settings/roles" },
         { title: "Billing", url: "/settings/billing" },
+        { title: "Clinical Assistant", url: "/clinical-assistant" },
+        { title: "AI Insights", url: "/ai-insights" },
       ],
+    },
+    {
+      title: "AI Insights",
+      url: "/ai-insights",
+      icon: LineChart,
+      allowedRoles: ["admin"],
     },
   ],
   navSecondary: [

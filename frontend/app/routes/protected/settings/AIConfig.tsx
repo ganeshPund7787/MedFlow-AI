@@ -5,16 +5,32 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Loader from "@/components/global/Loader";
 import { toast } from "sonner";
-import { Sparkles, ShieldAlert, Cpu, Thermometer, HelpCircle } from "lucide-react";
+import {
+  Sparkles,
+  ShieldAlert,
+  Cpu,
+  Thermometer,
+  HelpCircle,
+} from "lucide-react";
 
 const AIConfig = () => {
   const queryClient = useQueryClient();
 
-  const { data: config, isLoading, isError } = useQuery({
+  const {
+    data: config,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["hospital-settings"],
     queryFn: getSettings,
   });
@@ -31,7 +47,7 @@ const AIConfig = () => {
   });
 
   // Local Form State
-  const [aiModelName, setAiModelName] = useState("gemini-2.5-flash");
+  const [aiModelName, setAiModelName] = useState("gemini-2.0-flash");
   const [aiTemperature, setAiTemperature] = useState(0.2);
   const [aiTriageInstructions, setAiTriageInstructions] = useState("");
 
@@ -56,7 +72,9 @@ const AIConfig = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[300px] text-red-500 gap-2">
         <ShieldAlert size={24} />
-        <p className="text-sm font-semibold">Failed to load AI configurations.</p>
+        <p className="text-sm font-semibold">
+          Failed to load AI configurations.
+        </p>
       </div>
     );
   }
@@ -87,7 +105,8 @@ const AIConfig = () => {
           AI Brain & Prompt Configurations
         </CardTitle>
         <CardDescription>
-          Customize model templates, triage algorithms, reasoning heat indexes, and standard operating prompts.
+          Customize model templates, triage algorithms, reasoning heat indexes,
+          and standard operating prompts.
         </CardDescription>
       </CardHeader>
 
@@ -98,20 +117,32 @@ const AIConfig = () => {
             <div className="space-y-1.5 p-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-xl">
               <div className="flex items-center gap-2 mb-1">
                 <Cpu className="text-blue-600" size={16} />
-                <Label htmlFor="model-name" className="text-xs font-bold">Standard LLM Model Selection</Label>
+                <Label htmlFor="model-name" className="text-xs font-bold">
+                  Standard LLM Model Selection
+                </Label>
               </div>
               <Select value={aiModelName} onValueChange={setAiModelName}>
-                <SelectTrigger id="model-name" className="rounded-lg text-xs h-9 bg-white dark:bg-slate-950">
+                <SelectTrigger
+                  id="model-name"
+                  className="rounded-lg text-xs h-9 bg-white dark:bg-slate-950"
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="gemini-2.5-flash" className="text-xs">Gemini 2.5 Flash</SelectItem>
-                  <SelectItem value="gemini-2.5-pro" className="text-xs">Gemini 2.5 Pro</SelectItem>
-                  <SelectItem value="gemini-1.5-flash" className="text-xs">Gemini 1.5 Flash (Legacy)</SelectItem>
+                  <SelectItem value="gemini-2.5-flash" className="text-xs">
+                    gemini-2.0-flash
+                  </SelectItem>
+                  <SelectItem value="gemini-2.5-pro" className="text-xs">
+                    Gemini 2.5 Pro
+                  </SelectItem>
+                  <SelectItem value="gemini-1.5-flash" className="text-xs">
+                    Gemini 1.5 Flash (Legacy)
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-[10px] text-slate-400 mt-1">
-                Selects the neural engine powering automated analysis and real-time medical triage routing.
+                Selects the neural engine powering automated analysis and
+                real-time medical triage routing.
               </p>
             </div>
 
@@ -119,7 +150,9 @@ const AIConfig = () => {
             <div className="space-y-1.5 p-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-xl">
               <div className="flex items-center gap-2 mb-1">
                 <Thermometer className="text-amber-500" size={16} />
-                <Label htmlFor="temp" className="text-xs font-bold">Model Temperature (Creativity Heat)</Label>
+                <Label htmlFor="temp" className="text-xs font-bold">
+                  Model Temperature (Creativity Heat)
+                </Label>
               </div>
               <div className="flex items-center gap-2">
                 <Input
@@ -136,7 +169,8 @@ const AIConfig = () => {
                 />
               </div>
               <p className="text-[10px] text-slate-400 mt-1">
-                Lower values (0.1 - 0.3) provide highly consistent clinical triage. Higher values increase clinical reasoning randomness.
+                Lower values (0.1 - 0.3) provide highly consistent clinical
+                triage. Higher values increase clinical reasoning randomness.
               </p>
             </div>
           </div>
@@ -158,7 +192,8 @@ const AIConfig = () => {
               required
             />
             <p className="text-[10px] text-slate-400">
-              Defines system-level context injected prior to matching patients with attending clinical specialists.
+              Defines system-level context injected prior to matching patients
+              with attending clinical specialists.
             </p>
           </div>
         </div>
@@ -169,7 +204,11 @@ const AIConfig = () => {
             disabled={updateMutation.isPending}
             className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg h-9 text-xs font-bold shadow-blue-500/10 animate-pulse-slow"
           >
-            {updateMutation.isPending ? <Loader label="Saving..." /> : "Save Changes"}
+            {updateMutation.isPending ? (
+              <Loader label="Saving..." />
+            ) : (
+              "Save Changes"
+            )}
           </Button>
         </div>
       </form>

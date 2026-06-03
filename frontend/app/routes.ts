@@ -30,6 +30,8 @@ export default [
     route("records", "routes/protected/FinancialRecords.tsx"),
     route("appointments", "routes/protected/Appointments.tsx"),
     route("telemedicine", "routes/protected/Telemedicine.tsx"),
+    route("clinical-assistant", "routes/protected/ClinicalAssistant.tsx"),
+    route("ai-insights", "routes/protected/admin/AIInsights.tsx"),
     route("settings", "routes/protected/settings/SettingsLayout.tsx", [
       index("routes/protected/settings/SettingsIndex.tsx"),
       route("general", "routes/protected/settings/GeneralSettings.tsx"),

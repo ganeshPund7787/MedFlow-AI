@@ -428,3 +428,64 @@ export const updateAppointment = async ({
     body: JSON.stringify(data),
   });
 };
+
+export interface ClinicalAssistantInsight {
+  patientSummary: string;
+  medicalHistorySummary: string;
+  medicationSummary: string;
+  missedFollowUps: string[];
+  abnormalTrends: string[];
+  riskAlerts: string[];
+}
+
+export interface OperationsAnalystInsight {
+  executiveSummary: string;
+  forecasts: string[];
+  bottlenecks: string[];
+  recommendations: string[];
+  kpis: {
+    revenueTrend: string;
+    bedOccupancy: string;
+    appointmentTrend: string;
+    departmentPerformance: string;
+    staffWorkload: string;
+  };
+  rawMetrics?: {
+    totalRevenueInr: number;
+    totalAppointments: number;
+    completedAppointments: number;
+    admittedPatients: number;
+    bedOccupancyPercent: number;
+  };
+}
+
+export interface NlSearchResponse {
+  intent: string;
+  collection: "user" | "invoice" | "appointment";
+  mongoFilter: Record<string, unknown>;
+  summary: string;
+  results: any[];
+}
+
+export const getClinicalAssistantInsights = async (patientId: string): Promise<{ data: ClinicalAssistantInsight }> => {
+  return fetchWithTimeout(`${API_URL}/ai/clinical-assistant`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ patientId }),
+  });
+};
+
+export const getOperationsAnalystInsights = async (days = 30): Promise<{ data: OperationsAnalystInsight }> => {
+  return fetchWithTimeout(`${API_URL}/ai/operations-analyst?days=${days}`);
+};
+
+export const searchWithNaturalLanguage = async (payload: {
+  query: string;
+  limit?: number;
+}): Promise<{ data: NlSearchResponse }> => {
+  return fetchWithTimeout(`${API_URL}/ai/nl-search`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+};

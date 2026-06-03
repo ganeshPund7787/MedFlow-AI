@@ -7,6 +7,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "./theme-toggle";
 import Notifications from "./Notifications";
 import ConnectionStatus from "../global/ConnectionStatus";
+import NLSearchDialog from "../search/NLSearchDialog";
 
 const Header = () => {
   const { pathname } = useLocation();
@@ -29,6 +30,7 @@ const Header = () => {
           </p>
         </div>
         <div className="flex gap-2 items-center">
+          <NLSearchDialog />
           <ConnectionStatus />
           <Separator orientation="vertical" />
           <ThemeToggle />

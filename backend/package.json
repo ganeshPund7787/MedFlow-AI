@@ -3,6 +3,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "build": "bun build ./src/server.ts --outdir ./dist --target=node",
     "watch": "bun --watch index.ts",
     "start:ngrok": "ngrok http 5000",
     "start:inngest": "npx --ignore-scripts=false inngest-cli@latest dev",
@@ -35,12 +36,14 @@
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
     "helmet": "^8.1.0",
     "inngest": "^4.5.0",
     "mongodb": "^7.1.0",
     "mongoose": "^9.2.4",
     "morgan": "^1.10.1",
     "socket.io": "^4.8.3",
-    "uploadthing": "^7.7.4"
+    "uploadthing": "^7.7.4",
+    "zod": "^4.4.3"
   }
 }

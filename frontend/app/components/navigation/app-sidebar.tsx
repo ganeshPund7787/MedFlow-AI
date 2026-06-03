@@ -99,6 +99,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenu>
               {filteredMain.map((item) => {
                 const isActive = isGroupActive(item.items, item.url);
+                const hasChildren = Boolean(item.items?.length);
+
+                if (!hasChildren) {
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        tooltip={item.title}
+                        isActive={pathname === item.url}
+                        size="lg"
+                        className="group-data-[collapsible=icon]:justify-center!"
+                      >
+                        <Link to={item.url}>
+                          {item.icon && <item.icon />}
+                          <span className="group-data-[collapsible=icon]:hidden">
+                            {item.title}
+                          </span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                }
 
                 return (
                   <Collapsible
@@ -159,6 +181,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenu>
               {filteredAdmin.map((item) => {
                 const isActive = isGroupActive(item.items, item.url);
+                const hasChildren = Boolean(item.items?.length);
+
+                if (!hasChildren) {
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        tooltip={item.title}
+                        isActive={pathname === item.url}
+                        size="lg"
+                        className="group-data-[collapsible=icon]:justify-center!"
+                      >
+                        <Link to={item.url}>
+                          {item.icon && <item.icon />}
+                          <span className="group-data-[collapsible=icon]:hidden">
+                            {item.title}
+                          </span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                }
+
                 return (
                   <Collapsible
                     key={item.title}
