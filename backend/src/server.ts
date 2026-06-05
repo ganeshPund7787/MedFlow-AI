@@ -49,7 +49,10 @@ initSocket(httpServer);
 // Make 'io' accessible in Express req.app.get("io") for backwards compatibility
 app.set("io", getIO());
 
-import { errorMiddleware, notFoundMiddleware } from "./middleware/errorMiddleware";
+import {
+  errorMiddleware,
+  notFoundMiddleware,
+} from "./middleware/errorMiddleware";
 
 // --- Global Process Handlers (Anti-Gravity) ---
 process.on("unhandledRejection", (reason, promise) => {
@@ -140,7 +143,6 @@ app.use("/api/uploadthing/delete", uploadthingRouter);
 // --- Anti-Gravity Resilience Middleware ---
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
-
 
 // Start the server
 connectDB()
