@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "bun build ./src/server.ts --outdir ./dist --target=node",
+    "start": "bun run src/server.ts",
     "watch": "bun --watch index.ts",
     "start:ngrok": "ngrok http 5000",
     "start:inngest": "npx --ignore-scripts=false inngest-cli@latest dev",
