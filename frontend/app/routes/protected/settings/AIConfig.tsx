@@ -130,7 +130,7 @@ const AIConfig = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="gemini-2.5-flash" className="text-xs">
-                    gemini-2.0-flash
+                    gemini-2.5-flash
                   </SelectItem>
                   <SelectItem value="gemini-2.5-pro" className="text-xs">
                     Gemini 2.5 Pro
