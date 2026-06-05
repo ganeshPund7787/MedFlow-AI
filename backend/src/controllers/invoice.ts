@@ -44,7 +44,10 @@ export const getMyActiveInvoice = async (req: Request, res: Response) => {
 // get billing history(you can remove status if you want to fetch all invoices)
 export const getBillingHistory = async (req: Request, res: Response) => {
   try {
-    const resolved = resolvePatientBillingId(req, req.params.patientId);
+    const resolved = resolvePatientBillingId(
+      req,
+      req.params.patientId?.toString(),
+    );
     if ("error" in resolved) {
       return res.status(resolved.status).json({ message: resolved.error });
     }
@@ -71,8 +74,8 @@ export const getBillingHistory = async (req: Request, res: Response) => {
 
 export const allBilling = async (req: Request, res: Response) => {
   try {
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 10;
+    const page = Number(req.query.page as string) || 1;
+    const limit = Number(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
     const billings = await invoice
@@ -142,7 +145,9 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
     }
 
     if (userInvoice.totalAmount <= 0) {
-      return res.status(400).json({ message: "Invoice has no payable balance" });
+      return res
+        .status(400)
+        .json({ message: "Invoice has no payable balance" });
     }
 
     const session = await auth.api.getSession({
@@ -215,13 +220,17 @@ export const getFinancialStats = async (req: Request, res: Response) => {
       }
     });
 
-    const [collectedRevenue, successfulPayments, failedPayments, totalPayments] =
-      await Promise.all([
-        getCollectedRevenueCents(),
-        countSuccessfulTransactions(),
-        Payment.countDocuments({ status: "failed" }),
-        Payment.countDocuments(),
-      ]);
+    const [
+      collectedRevenue,
+      successfulPayments,
+      failedPayments,
+      totalPayments,
+    ] = await Promise.all([
+      getCollectedRevenueCents(),
+      countSuccessfulTransactions(),
+      Payment.countDocuments({ status: "failed" }),
+      Payment.countDocuments(),
+    ]);
 
     res.status(200).json({
       totalRevenue: collectedRevenue || totalRevenue,
@@ -247,7 +256,9 @@ export const confirmPolarCheckout = async (req: Request, res: Response) => {
   try {
     const sessionUser = (req as any).user;
     if (sessionUser.role !== "patient") {
-      return res.status(403).json({ message: "Only patients can confirm checkout" });
+      return res
+        .status(403)
+        .json({ message: "Only patients can confirm checkout" });
     }
 
     const { checkoutId } = req.body as { checkoutId?: string };

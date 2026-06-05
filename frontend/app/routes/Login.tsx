@@ -65,13 +65,14 @@ const Login = () => {
         // Optional: Callbacks for cleaner logic
         onSuccess: async () => {
           toast.success("Login Successful!");
-          const { data: freshSession } = await authClient.getSession();
-          navigate(
-            getPostLoginPath(
-              freshSession?.user?.role || undefined,
-              freshSession?.user?.id,
-            ),
-          );
+
+          // const { data: freshSession } = await authClient.getSession();
+          // navigate(
+          //   getPostLoginPath(
+          //     freshSession?.user?.role || undefined,
+          //     freshSession?.user?.id,
+          //   ),
+          // );
         },
         onError: (ctx) => {
           // ctx.error.message contains the server response (e.g. "Invalid password")
@@ -166,6 +167,7 @@ const Login = () => {
                   />
                 </div>
               )}
+              onSuccess
             </Button>
           </form>
         </CardContent>
