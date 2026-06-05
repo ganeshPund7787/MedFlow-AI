@@ -28,6 +28,13 @@ export const auth = betterAuth({
   ],
   advanced: {
     disableCSRFCheck: true,
+    cookiePrefix: "medflow",
+    defaultCookieAttributes: {
+      sameSite: "none", // ✅ required for cross-origin
+      secure: true, // ✅ required when sameSite=none
+      httpOnly: true,
+      partitioned: true, // ✅ CHIPS — for Chrome's new cookie rules
+    },
   },
   trustedOriginsMode: "allow",
   trustedOriginsStrict: false,
