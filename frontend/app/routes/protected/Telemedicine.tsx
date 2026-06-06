@@ -1,14 +1,31 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAppointments, updateAppointment } from "@/lib/api";
 import { useSearchParams, useNavigate, Link } from "react-router";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Video, VideoOff, Mic, MicOff, ScreenShare, PhoneOff, User, FileText, CheckCircle, ShieldAlert, ShieldCheck } from "lucide-react";
+import {
+  Video,
+  VideoOff,
+  Mic,
+  MicOff,
+  ScreenShare,
+  PhoneOff,
+  User,
+  FileText,
+  CheckCircle,
+  ShieldAlert,
+  ShieldCheck,
+} from "lucide-react";
 import Loader from "@/components/global/Loader";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
@@ -47,7 +64,9 @@ const Telemedicine = () => {
   const completeApptMutation = useMutation({
     mutationFn: updateAppointment,
     onSuccess: (res: any) => {
-      toast.success("Telemedicine consultation successfully signed off and billing dispatched.");
+      toast.success(
+        "Telemedicine consultation successfully signed off and billing dispatched.",
+      );
       queryClient.invalidateQueries({ queryKey: ["appointments-list"] });
       navigate("/appointments");
     },
@@ -74,10 +93,14 @@ const Telemedicine = () => {
           <ShieldAlert size={32} />
         </div>
         <CardTitle className="text-lg">No Active Room Found</CardTitle>
-        <CardDescription className="text-xs mt-1 max-w-[280px]">
-          Virtual rooms require an active slot invitation link. Please enter via your schedules directory.
+        <CardDescription className="text-xs mt-1 max-w-70">
+          Virtual rooms require an active slot invitation link. Please enter via
+          your schedules directory.
         </CardDescription>
-        <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg h-9 text-xs mt-4">
+        <Button
+          asChild
+          className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg h-9 text-xs mt-4"
+        >
           <Link to="/appointments">Go to Appointments</Link>
         </Button>
       </Card>
@@ -93,7 +116,9 @@ const Telemedicine = () => {
   }
 
   const appointmentsList = data?.res || [];
-  const activeAppointment = appointmentsList.find((a: any) => a.meetingId === roomName);
+  const activeAppointment = appointmentsList.find(
+    (a: any) => a.meetingId === roomName,
+  );
 
   if (!activeAppointment) {
     return (
@@ -102,10 +127,14 @@ const Telemedicine = () => {
           <ShieldAlert size={32} />
         </div>
         <CardTitle className="text-lg">Invalid Telemedicine Link</CardTitle>
-        <CardDescription className="text-xs mt-1 max-w-[280px]">
-          The requested virtual slot does not exist or has already been signed off.
+        <CardDescription className="text-xs mt-1 max-w-70">
+          The requested virtual slot does not exist or has already been signed
+          off.
         </CardDescription>
-        <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg h-9 text-xs mt-4">
+        <Button
+          asChild
+          className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg h-9 text-xs mt-4"
+        >
           <Link to="/appointments">Go to Appointments</Link>
         </Button>
       </Card>
@@ -132,7 +161,9 @@ const Telemedicine = () => {
       id: activeAppointment._id,
       data: {
         status: "completed",
-        reason: activeAppointment.reason + ` | Clinical Observations: ${clinicalNotes}`,
+        reason:
+          activeAppointment.reason +
+          ` | Clinical Observations: ${clinicalNotes}`,
       },
     });
   };
@@ -146,7 +177,10 @@ const Telemedicine = () => {
             Virtual Consultation
           </h1>
           <p className="text-slate-500 font-medium">
-            Room: <span className="font-mono text-blue-600">{roomName.slice(0, 15)}...</span>
+            Room:{" "}
+            <span className="font-mono text-blue-600">
+              {roomName.slice(0, 15)}...
+            </span>
           </p>
         </div>
         <Badge className="bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-100/80 gap-1.5 text-xs px-2.5 py-1">
@@ -155,10 +189,10 @@ const Telemedicine = () => {
       </div>
 
       {/* Split grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-stretch min-h-[500px]">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-stretch min-h-125">
         {/* Left Side: Call Streams (2/3) */}
         <div className="xl:col-span-2 flex flex-col space-y-4 h-full">
-          <Card className="flex-1 bg-slate-950 dark:bg-black border-none rounded-2xl overflow-hidden relative shadow-lg min-h-[400px] flex flex-col justify-between">
+          <Card className="flex-1 bg-slate-950 dark:bg-black border-none rounded-2xl overflow-hidden relative shadow-lg min-h-100 flex flex-col justify-between">
             {/* Header info */}
             <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
               <Badge className="bg-black/60 text-white border-none gap-1.5 py-1 px-2.5 text-[10px]">
@@ -189,18 +223,40 @@ const Telemedicine = () => {
                   </div>
                   {/* Visual microphone wave simulation */}
                   <div className="flex items-center gap-1 mt-6">
-                    <span className="h-4 w-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
-                    <span className="h-6 w-1 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
-                    <span className="h-5 w-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0.3s" }} />
-                    <span className="h-3 w-1 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }} />
-                    <span className="h-7 w-1 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0.5s" }} />
+                    <span
+                      className="h-4 w-1 bg-blue-500 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.1s" }}
+                    />
+                    <span
+                      className="h-6 w-1 bg-blue-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.2s" }}
+                    />
+                    <span
+                      className="h-5 w-1 bg-blue-500 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.3s" }}
+                    />
+                    <span
+                      className="h-3 w-1 bg-blue-600 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.4s" }}
+                    />
+                    <span
+                      className="h-7 w-1 bg-blue-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.5s" }}
+                    />
                   </div>
-                  <p className="text-xs font-semibold text-slate-500 mt-2">Streaming High-Fidelity peer audio...</p>
+                  <p className="text-xs font-semibold text-slate-500 mt-2">
+                    Streaming High-Fidelity peer audio...
+                  </p>
                 </div>
               ) : (
                 <div className="text-slate-600 flex flex-col items-center justify-center">
-                  <VideoOff size={48} className="text-slate-700 animate-pulse" />
-                  <p className="text-sm font-bold mt-2">Camera disabled by remote user</p>
+                  <VideoOff
+                    size={48}
+                    className="text-slate-700 animate-pulse"
+                  />
+                  <p className="text-sm font-bold mt-2">
+                    Camera disabled by remote user
+                  </p>
                 </div>
               )}
 
@@ -249,7 +305,8 @@ const Telemedicine = () => {
                 variant={sharingScreen ? "outline" : "outline"}
                 onClick={() => {
                   setSharingScreen(!sharingScreen);
-                  if (!sharingScreen) toast.success("Simulating screen sharing...");
+                  if (!sharingScreen)
+                    toast.success("Simulating screen sharing...");
                 }}
                 className={`h-10 w-10 rounded-xl border-slate-800 hover:bg-slate-800 ${sharingScreen ? "bg-blue-600 border-blue-600 text-white" : "text-slate-300"}`}
               >
@@ -287,27 +344,39 @@ const Telemedicine = () => {
                 </div>
               </div>
             </CardHeader>
-            
+
             <CardContent className="p-6 flex-1 flex flex-col justify-between gap-6">
               <div className="space-y-4">
                 {/* Patient summary details */}
                 <div className="p-3 bg-slate-50 dark:bg-slate-900/30 border rounded-xl space-y-2">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-slate-900 dark:text-slate-100">{patient.name || "Patient"}</span>
+                    <span className="font-bold text-slate-900 dark:text-slate-100">
+                      {patient.name || "Patient"}
+                    </span>
                     <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
-                      Age: {patient.age || "N/A"} • Gender: {patient.gender || "N/A"}
+                      Age: {patient.age || "N/A"} • Gender:{" "}
+                      {patient.gender || "N/A"}
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-500">
-                    <span className="font-bold text-slate-400">Chief Complaint:</span> "{activeAppointment.reason}"
+                    <span className="font-bold text-slate-400">
+                      Chief Complaint:
+                    </span>{" "}
+                    "{activeAppointment.reason}"
                   </p>
                 </div>
 
                 {/* Attending Notes or observations */}
                 {isDoctor ? (
-                  <form onSubmit={handleCompleteCall} className="space-y-4 flex flex-col">
+                  <form
+                    onSubmit={handleCompleteCall}
+                    className="space-y-4 flex flex-col"
+                  >
                     <div className="space-y-1.5">
-                      <Label htmlFor="clinical-notes" className="text-xs font-bold">
+                      <Label
+                        htmlFor="clinical-notes"
+                        className="text-xs font-bold"
+                      >
                         Attending Doctor Notes / Prescriptions
                       </Label>
                       <Textarea
@@ -315,7 +384,7 @@ const Telemedicine = () => {
                         placeholder="Document physical diagnosis, prescribe formulas, and recommend treatment plans..."
                         value={clinicalNotes}
                         onChange={(e) => setClinicalNotes(e.target.value)}
-                        className="rounded-lg min-h-[160px] text-xs leading-relaxed"
+                        className="rounded-lg min-h-40 text-xs leading-relaxed"
                         required
                       />
                     </div>
@@ -325,9 +394,13 @@ const Telemedicine = () => {
                     <div className="h-10 w-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mx-auto">
                       <FileText size={18} />
                     </div>
-                    <h5 className="text-xs font-bold text-slate-800">attending doctor notes</h5>
-                    <p className="text-[10px] text-slate-400 max-w-[200px] mx-auto leading-relaxed">
-                      Please wait for the practitioner to document observations and clinical prescriptions. Notes will show in your profile files upon consultation sign-off.
+                    <h5 className="text-xs font-bold text-slate-800">
+                      attending doctor notes
+                    </h5>
+                    <p className="text-[10px] text-slate-400 max-w-50 mx-auto leading-relaxed">
+                      Please wait for the practitioner to document observations
+                      and clinical prescriptions. Notes will show in your
+                      profile files upon consultation sign-off.
                     </p>
                   </div>
                 )}
@@ -345,7 +418,8 @@ const Telemedicine = () => {
                       <Loader label="Fulfilling..." />
                     ) : (
                       <>
-                        <CheckCircle size={16} /> Fulfill & Sign-off Consultation
+                        <CheckCircle size={16} /> Fulfill & Sign-off
+                        Consultation
                       </>
                     )}
                   </Button>

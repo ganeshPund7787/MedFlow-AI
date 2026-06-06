@@ -9,8 +9,7 @@ const genAI = process.env.GEMINI_KEY
   ? new GoogleGenerativeAI(process.env.GEMINI_KEY)
   : null;
 
-const GEMINI_MODEL =
-  process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
 /** Avoid exposing raw Google API errors (e.g. leaked key) in patient-facing text. */
 export function toUserFacingGeminiError(error: unknown): string {
@@ -38,7 +37,7 @@ export async function analyzeXrayWithGemini(
   }
 
   const contentType = response.headers.get("content-type") || "image/jpeg";
-  const mimeType = contentType.split(";")[0].trim() || "image/jpeg";
+  const mimeType = (contentType.split(";")[0] ?? "image/jpeg").trim();
   const imageBase64 = Buffer.from(await response.arrayBuffer()).toString(
     "base64",
   );
@@ -111,8 +110,7 @@ export async function addXrayBillingCharge(
   patientId: string | mongoose.Types.ObjectId,
   bodyPart: string,
 ) {
-  const pid =
-    typeof patientId === "string" ? patientId : patientId.toString();
+  const pid = typeof patientId === "string" ? patientId : patientId.toString();
   const description = `Radiology: ${bodyPart || "General"} X-Ray Analysis`;
   const priceInCents = 15000;
 

@@ -103,7 +103,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
     <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-6 font-sans">
       <div className="max-w-2xl w-full space-y-8 animate-in fade-in zoom-in duration-500">
         <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-red-600 to-orange-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+          <div className="absolute -inset-1 bg-linear-to-r from-red-600 to-orange-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
           <div className="relative bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl">
             <div className="flex items-center gap-4 mb-6">
               <div className="p-3 bg-red-500/10 rounded-xl border border-red-500/20">
@@ -113,7 +113,9 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
                 <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">
                   {message}
                 </h1>
-                <p className="text-zinc-400 font-medium">Critical Fault Detected</p>
+                <p className="text-zinc-400 font-medium">
+                  Critical Fault Detected
+                </p>
               </div>
             </div>
 
@@ -124,7 +126,9 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 
               {stack && import.meta.env.DEV && (
                 <div className="mt-4 p-4 bg-zinc-950 rounded-lg border border-zinc-800/50 overflow-hidden">
-                  <p className="text-xs font-semibold text-zinc-500 uppercase mb-2">Technical Telemetry</p>
+                  <p className="text-xs font-semibold text-zinc-500 uppercase mb-2">
+                    Technical Telemetry
+                  </p>
                   <pre className="text-[10px] text-zinc-600 overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-48 scrollbar-hide">
                     {stack}
                   </pre>
@@ -133,14 +137,14 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 mt-8">
-              <Button 
+              <Button
                 onClick={() => window.location.reload()}
                 className="flex-1 bg-zinc-100 text-zinc-950 hover:bg-zinc-200 transition-all font-semibold gap-2 border-none h-12"
               >
                 <RefreshCcw className="w-4 h-4" />
                 Initialize Recovery (Reload)
               </Button>
-              <Button 
+              <Button
                 asChild
                 variant="outline"
                 className="flex-1 border-zinc-800 hover:bg-zinc-800 transition-all font-semibold gap-2 text-zinc-300 h-12"
