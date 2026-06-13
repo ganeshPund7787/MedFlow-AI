@@ -50,13 +50,6 @@ export async function generateClinicalAssistant(patientId: string) {
         .lean(),
     ]);
 
-  // ADD THESE LOGS:
-  console.log("[ClinicalAI] patientId received:", patientId);
-  console.log("[ClinicalAI] objectId created:", objectId);
-  console.log("[ClinicalAI] patient found:", !!patient, patient?._id);
-  console.log("[ClinicalAI] appts:", recentAppointments.length);
-  console.log("[ClinicalAI] vitals:", recentVitals.length);
-  console.log("[ClinicalAI] invoices:", invoices.length);
   if (!patient) {
     throw new Error("Patient not found.");
   }
@@ -73,8 +66,14 @@ export async function generateClinicalAssistant(patientId: string) {
 
   const aiPayload = await runGeminiJsonPrompt<ClinicalAssistantResult>({
     prompt: `You are MedFlow AI Clinical Assistant.
-Return strict JSON with keys:
-patientSummary, medicalHistorySummary, medicationSummary, missedFollowUps, abnormalTrends, riskAlerts.
+Return strict JSON with exactly these keys:
+- patientSummary: string
+- medicalHistorySummary: string
+- medicationSummary: string  
+- missedFollowUps: array of strings (empty array [] if none)
+- abnormalTrends: array of strings (empty array [] if none)
+- riskAlerts: array of strings (empty array [] if none)
+IMPORTANT: missedFollowUps, abnormalTrends, riskAlerts MUST be JSON arrays, never plain strings.
 Use concise and clinically safe language.
 
 Patient:
@@ -108,6 +107,14 @@ ${JSON.stringify(missedFollowUps, null, 2)}
   });
 
   const parsed = clinicalAssistantResponseSchema.safeParse(aiPayload);
+
+  if (!parsed.success) {
+    console.error(
+      "[ClinicalAI] Zod errors:",
+      JSON.stringify(parsed.error.flatten(), null, 2),
+    );
+  }
+
   if (!parsed.success) {
     return fallbackClinicalSummary();
   }
@@ -115,5 +122,6 @@ ${JSON.stringify(missedFollowUps, null, 2)}
   if (!parsed.data.missedFollowUps.length && missedFollowUps.length) {
     parsed.data.missedFollowUps = missedFollowUps;
   }
+  console.log("parsed.data : ", parsed.data);
   return parsed.data;
 }

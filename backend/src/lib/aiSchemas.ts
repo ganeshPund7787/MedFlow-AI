@@ -13,13 +13,33 @@ export const nlSearchRequestSchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).optional().default(20),
 });
 
+// export const clinicalAssistantResponseSchema = z.object({
+//   patientSummary: z.string(),
+//   medicalHistorySummary: z.string(),
+//   medicationSummary: z.string(),
+//   missedFollowUps: z.array(z.string()),
+//   abnormalTrends: z.array(z.string()),
+//   riskAlerts: z.array(z.string()),
+// });
+
+// Helper: accepts string or array, always outputs string[]
+const stringOrArray = z.union([
+  z.array(z.string()),
+  z.string().transform((s) =>
+    s
+      .split(/,\s*/)
+      .map((x) => x.trim())
+      .filter(Boolean),
+  ),
+]);
+
 export const clinicalAssistantResponseSchema = z.object({
   patientSummary: z.string(),
   medicalHistorySummary: z.string(),
   medicationSummary: z.string(),
-  missedFollowUps: z.array(z.string()),
-  abnormalTrends: z.array(z.string()),
-  riskAlerts: z.array(z.string()),
+  missedFollowUps: stringOrArray,
+  abnormalTrends: stringOrArray,
+  riskAlerts: stringOrArray,
 });
 
 export const operationsAnalystResponseSchema = z.object({
